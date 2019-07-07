@@ -27,6 +27,7 @@ display the following comprehensive information.
   * word
   * part-of-speech
   * pinyin
+  * descriptive pinyin: where Chinese tone change rules are applied
   * English meaning
   * traditional equivalent
 
@@ -36,6 +37,7 @@ e.g., Input: 我写了几行代码。 (I wrote a few lines of codes.)
 
 * STEP 1. Segment input string using [pkuseg](https://arxiv.org/abs/1906.11455).
   * -> [('我', 'r'), ('写', 'v'), ('了', 'u'), ('几', 'm'), ('行', 'q'), ('代码', 'n'), ('。', 'w')]
+
 * STEP 2. Look up the [CC-CEDICT](https://cc-cedict.org/wiki/). Each token, a tuple, consists of
 word, pos, pronunciation candidates, meaning candidates, traditional character candidates.
   * -> [('我', 'r', ['wo3'], ['/I/me/my/'], ['我']), <br>
@@ -46,25 +48,29 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 ('代码', 'n', ['dai4 ma3'], ['/code/'], ['代碼']), <br>
 ('。', 'w', ['。'], [''], ['。'])]
 * STEP 3. For polyphonic words, we disambiguate them, using our pre-trained CRF model.
-  * -> [('我', 'r', 'wo3', '/I/me/my/', '我'), <br>
-('写', 'v', 'xie3', '/to write/', '寫'), <br>
-('了', 'u', 'le5', '/(modal particle ..', '了'), <br>
-('几', 'm', 'ji3', '/how much/..', '幾'), <br >
-('行', 'q', 'hang2', "/row/..", '行'), <br>
-('代码', 'n', 'dai4 ma3', '/code/', '代碼'), <br>
-('。', 'w', '。', '', '。')]
+  * -> [('我', 'r', 'wo3', 'wo2', '/I/me/my/', '我'), <br>
+('写', 'v', 'xie3', 'xie3', '/to write/', '寫'), <br>
+('了', 'u', 'le5', 'le5', '/(modal particle ..', '了'), <br>
+('几', 'm', 'ji3', 'ji3', '/how much/..', '幾'), <br >
+('行', 'q', 'hang2', 'hang2, "/row/..", '行'), <br>
+('代码', 'n', 'dai4 ma3', 'dai4 ma3', '/code/', '代碼'), <br>
+('。', 'w', '。', '。', '', '。')]
 
 ## Usage
 ```
 >>> from g2pc import G2pC
 >>> g2p = G2pC()
->>> g2p("来不了")
+>>> g2p("一心一意")
 # This returns a list of tuples, each of which consists of
-# word, pos, pinyin, English meaning, and equivanlent traditional character.
-[('来', 'v', 'lai2', '/to come/to arrive/to come round/ever since/next/', '來'), 
-('不', 'd', 'bu4', '/(negative prefix)/not/no/', '不'), 
-('了', 'v', 'liao3', '/to finish/to achieve/variant of 瞭|了[liao3]/to understand clearly/', '了')]
+# word, pos, pinyin, (tone changed) descriptive pinyin, English meaning, and equivanlent traditional character.
+[[('一心一意', 
+'i', 
+'yi1 xin1 yi1 yi4', 
+'yi4 xin1 yi2 yi4', 
+"/concentrating one's thoughts and efforts/single-minded/bent on/intently/", 
+'一心一意')]
 ```
+
 
 ## Respectful comparison with other libraries
 ```
@@ -88,6 +94,20 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 >>> p.get_pinyin(text2, tone_marks="numbers")   
 'lai2-bu4-le5'
 ```
+
+## Changelog
+
+### 0.9.6. July 7, 2019
+* Fixed a bug of failing to converting words not found in the dictionary.
+* Rearragned the `cedict.pkl`.
+* Refined the CRF model.
+* Added tone change rules. (See [this](https://github.com/Kyubyong/g2pC/issues/1))
+
+### 0.9.4. July 4, 2019
+* Initial launch
+
+
+
 ## References
 
 If you use our software for research, please cite:
