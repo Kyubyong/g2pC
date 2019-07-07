@@ -1,3 +1,6 @@
+[![image](https://img.shields.io/pypi/v/g2pc.svg)](https://pypi.org/project/g2pC/)
+[![image](https://img.shields.io/pypi/pyversions/g2pc.svg)](https://pypi.org/project/g2pc/)
+
 # g2pC: A Context-aware Grapheme-to-Phoneme for Chinese
 
 There are several open source libraries of Chinese grapheme-to-phoneme 
