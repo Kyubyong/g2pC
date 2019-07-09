@@ -10,7 +10,7 @@ REQUIRED_PACKAGES = [
 
 setuptools.setup(
     name="g2pC",
-    version="0.9.6",
+    version="0.9.9.1",
     author="Kyubyong Park",
     author_email="kbpark.linguist@gmail.com",
     description="g2pC: A Context-aware g2p module for Chinese",
