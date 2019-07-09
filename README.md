@@ -1,5 +1,7 @@
+[![image](https://img.shields.io/pypi/v/g2pc.svg)](https://pypi.org/project/g2pC/)
+[![image](https://img.shields.io/pypi/l/g2pc.svg)](https://pypi.org/project/g2pC/)
+[![image](https://img.shields.io/pypi/pyversions/g2pc.svg)](https://pypi.org/project/g2pc/)
 # g2pC: A Context-aware Grapheme-to-Phoneme for Chinese
-
 There are several open source libraries of Chinese grapheme-to-phoneme 
 conversion such as [python-pinyin](https://github.com/mozillazg/python-pinyin) or [xpinyin](https://github.com/lxneng/xpinyin). 
 However, none of them seem to disambiguate Chinese polyphonic words like "行" 
@@ -7,18 +9,14 @@ However, none of them seem to disambiguate Chinese polyphonic words like "行"
 vs. "liǎo" (finish, achieve)). Instead, they pick up the most frequent pronunciation.
 Although that may be a simple and economic strategy, machine learning techniques can be of help.
 We use CRF to determine the pronunciation of polyphonic words. In addition to the target word itself and its part-of-speech, which are tagged by pkuseg, its neighboring words are also featurized.
-
-
 ## Requirements
 * python >= 3.6
 * pkuseg
 * sklearn_crfsuite
-
 ## Installation
 ```
 pip install g2pc
 ```
-
 ## Main Features
 * Disambiguate polyphonic Chinese characters/words and return the most likely pinyin in the
  context using CRF implemented with [sklearn_crfsuite](https://github.com/TeamHG-Memex/sklearn-crfsuite).
@@ -30,14 +28,10 @@ display the following comprehensive information.
   * descriptive pinyin: where Chinese tone change rules are applied
   * English meaning
   * traditional equivalent
-
 ## Algorithm (illustrated with an example)
-
 e.g., Input: 我写了几行代码。 (I wrote a few lines of codes.)
-
 * STEP 1. Segment input string using [pkuseg](https://arxiv.org/abs/1906.11455).
   * -> [('我', 'r'), ('写', 'v'), ('了', 'u'), ('几', 'm'), ('行', 'q'), ('代码', 'n'), ('。', 'w')]
-
 * STEP 2. Look up the [CC-CEDICT](https://cc-cedict.org/wiki/). Each token, a tuple, consists of
 word, pos, pronunciation candidates, meaning candidates, traditional character candidates.
   * -> [('我', 'r', ['wo3'], ['/I/me/my/'], ['我']), <br>
@@ -48,6 +42,15 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 ('代码', 'n', ['dai4 ma3'], ['/code/'], ['代碼']), <br>
 ('。', 'w', ['。'], [''], ['。'])]
 * STEP 3. For polyphonic words, we disambiguate them, using our pre-trained CRF model.
+  * -> [('我', 'r', 'wo3', '/I/me/my/', '我'), <br>
+('写', 'v', 'xie3', '/to write/', '寫'), <br>
+('了', 'u', 'le5', '/(modal particle ..', '了'), <br>
+('几', 'm', 'ji3', '/how much/..', '幾'), <br >
+('行', 'q', 'hang2', "/row/..", '行'), <br>
+('代码', 'n', 'dai4 ma3', '/code/', '代碼'), <br>
+('。', 'w', '。', '。', '', '。')]
+
+* STEP 4. Tone change rules are applied.
   * -> [('我', 'r', 'wo3', 'wo2', '/I/me/my/', '我'), <br>
 ('写', 'v', 'xie3', 'xie3', '/to write/', '寫'), <br>
 ('了', 'u', 'le5', 'le5', '/(modal particle ..', '了'), <br>
@@ -55,7 +58,6 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 ('行', 'q', 'hang2', 'hang2, "/row/..", '行'), <br>
 ('代码', 'n', 'dai4 ma3', 'dai4 ma3', '/code/', '代碼'), <br>
 ('。', 'w', '。', '。', '', '。')]
-
 ## Usage
 ```
 >>> from g2pc import G2pC
@@ -70,13 +72,10 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 "/concentrating one's thoughts and efforts/single-minded/bent on/intently/", 
 '一心一意')]
 ```
-
-
 ## Respectful comparison with other libraries
 ```
 >>> text1 = "我写了几行代码。" # pay attention to the 行, which should be read as 'hang2', not 'xing2'
 >>> text2 = "来不了" # pay attention to the 了, which should be read as 'liao3', not 'le'
-
 # python-pinyin
 >>> pip install pypinyin
 >>> from pypinyin import pinyin
@@ -84,7 +83,6 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 [['wǒ'], ['xiě'], ['le'], ['jǐ'], ['xíng'], ['dài'], ['mǎ'], ['。']]
 >>> pinyin(text2)
 [['lái'], ['bù'], ['le']]
-
 # xpinyin
 >>> pip install xpinyin
 >>> from xpinyin import Pinyin
@@ -94,10 +92,9 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 >>> p.get_pinyin(text2, tone_marks="numbers")   
 'lai2-bu4-le5'
 ```
-
 ## Changelog
-
 ### 0.9.9.1 July 9, 2019
+
 * Fixed a bug of failing to find Chinese characters for names. (See [this](https://github.com/Kyubyong/g2pC/issues/3))
 
 ### 0.9.6. July 7, 2019
@@ -105,16 +102,10 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 * Rearragned the `cedict.pkl`.
 * Refined the CRF model.
 * Added tone change rules. (See [this](https://github.com/Kyubyong/g2pC/issues/1))
-
 ### 0.9.4. July 4, 2019
 * Initial launch
-
-
-
 ## References
-
 If you use our software for research, please cite:
-
 ```
 @misc{gp2C2019,
   author = {Park, Kyubyong},
