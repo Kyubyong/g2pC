@@ -1,7 +1,3 @@
-[![image](https://img.shields.io/pypi/v/g2pc.svg)](https://pypi.org/project/g2pC/)
-[![image](https://img.shields.io/pypi/l/g2pc.svg)](https://pypi.org/project/g2pC/)
-[![image](https://img.shields.io/pypi/pyversions/g2pc.svg)](https://pypi.org/project/g2pc/)
-
 # g2pC: A Context-aware Grapheme-to-Phoneme for Chinese
 
 There are several open source libraries of Chinese grapheme-to-phoneme 
@@ -52,15 +48,6 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 ('代码', 'n', ['dai4 ma3'], ['/code/'], ['代碼']), <br>
 ('。', 'w', ['。'], [''], ['。'])]
 * STEP 3. For polyphonic words, we disambiguate them, using our pre-trained CRF model.
-  * -> [('我', 'r', 'wo3', '/I/me/my/', '我'), <br>
-('写', 'v', 'xie3', '/to write/', '寫'), <br>
-('了', 'u', 'le5', '/(modal particle ..', '了'), <br>
-('几', 'm', 'ji3', '/how much/..', '幾'), <br >
-('行', 'q', 'hang2', "/row/..", '行'), <br>
-('代码', 'n', 'dai4 ma3', '/code/', '代碼'), <br>
-('。', 'w', '。', '。', '', '。')]
-
-* STEP 4. Tone change rules are applied.
   * -> [('我', 'r', 'wo3', 'wo2', '/I/me/my/', '我'), <br>
 ('写', 'v', 'xie3', 'xie3', '/to write/', '寫'), <br>
 ('了', 'u', 'le5', 'le5', '/(modal particle ..', '了'), <br>
@@ -109,6 +96,9 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 ```
 
 ## Changelog
+
+### 0.9.9.1 July 9, 2019
+* Fixed a bug of failing to find Chinese characters for names. (See [this](https://github.com/Kyubyong/g2pC/issues/3))
 
 ### 0.9.6. July 7, 2019
 * Fixed a bug of failing to converting words not found in the dictionary.
