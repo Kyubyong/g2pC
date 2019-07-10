@@ -93,6 +93,9 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 'lai2-bu4-le5'
 ```
 ## Changelog
+### 0.9.9.3 July 10, 2019
+* Refined the tone change rules.
+
 ### 0.9.9.2 July 10, 2019
 * Refined the `cedict.pkl`. 
 
