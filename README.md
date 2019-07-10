@@ -92,6 +92,16 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 >>> p.get_pinyin(text2, tone_marks="numbers")   
 'lai2-bu4-le5'
 ```
+
+* Accuracy on internal test set (13,191 syllables)
+
+|Model|# Correct | # Incorrect  | Acc. (%) |
+|--|--|--|--|
+|g2pC (0.9.9.3)| 13,033 | 158 | <b>98.80</b> |
+|pypinyin (0.35.3)|12,975| 216| 98.36|
+|xpinyin (0.5.6)|12,838 |353| 97.32|
+
+Accuracy 
 ## Changelog
 ### 0.9.9.3 July 10, 2019
 * Refined the tone change rules.
