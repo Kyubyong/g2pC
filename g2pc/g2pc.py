@@ -81,85 +81,75 @@ def sent2features(sent):
     return [word2features(sent, i) for i in range(len(sent))]
 
 
-def tone33_to_23(pinyins):
+def _tone_change(hanzis, pinyins):
     '''https://en.wikipedia.org/wiki/Standard_Chinese_phonology#Tone_sandhi
-
-    1. Third tone change
-    When there are two consecutive third-tone syllables, the first of them is pronounced with second tone.
-    For example, lǎoshǔ老鼠 ("mouse") comes to be pronounced láoshǔ [lau̯˧˥ʂu˨˩]. It has been investigated whether the rising contour (˧˥) on the prior syllable is in fact identical to a normal second tone; it has been concluded that it is, at least in terms of auditory perception.[1]:237
-
-    When there are three or more third tones in a row, the situation becomes more complicated, since a third tone that precedes a second tone resulting from third tone sandhi may or may not be subject to sandhi itself. The results may depend on word boundaries, stress, and dialectal variations. General rules for three-syllable third-tone combinations can be formulated as follows:
-
-    If the first word is two syllables and the second word is one syllable, then the first two syllables become second tones. For example, bǎoguǎn hǎo 保管好 ("to take good care of") takes the pronunciation báoguán hǎo [pau̯˧˥kwan˧˥xau̯˨˩˦].
-    If the first word is one syllable, and the second word is two syllables, the second syllable becomes second tone, but the first syllable remains third tone. For example: lǎo bǎoguǎn 老保管("to take care of all the time") takes the pronunciation lǎo báoguǎn [lau̯˨˩pau̯˧˥kwan˨˩˦].
     '''
-    def _change(pinyin):
+    def tone33_to_23(pinyin):
         return re.sub("3( [^ ]+?3)", r"2\1", pinyin)
 
-    pinyins = " ".join(_change(pinyin) for pinyin in pinyins)
-    pinyins = _change(pinyins).split()
-    return pinyins
+    # STEP 1. word-level
+    ## Third tone change
+    pinyins = [tone33_to_23(pinyin) for pinyin in pinyins]
 
-def tone_bu(hanzis, pinyins):
-    '''https://en.wikipedia.org/wiki/Standard_Chinese_phonology#Tone_sandhi
-    2. For 不 bù:
+    ## when it comes at the end of a multi-syllable word
+    ##(regardless of the first tone of the next word),
+    ## 一 is pronounced with first tone.
+    _pinyins = []
+    for hanzi, pinyin in zip(hanzis, pinyins):
+        if len(hanzi)>1 and hanzi[0]=="一":
+            pinyin = re.sub("yi1$", "YI1", pinyin)
+        _pinyins.append(pinyin)
 
-    不 is pronounced with second tone when followed by a fourth tone syllable.
+    # STEP 2. phrase-level
+    ## remove boundaries
+    hanzis = "".join(hanzis)
+    pinyins = " ".join(_pinyins)
 
-        Example: 不是 (bù+shì, "to not be") becomes búshì [pu˧˥ʂɻ̩˥˩]
+    ## Third tone change
+    pinyins = tone33_to_23(pinyins)
+    pinyins = pinyins.split()
 
-    In other cases, 不 is pronounced with fourth tone.
-    However, when used between words in an A-not-A question,
-    it may become neutral in tone (e.g. 是不是 shìbushì).
-    '''
-    # A不A -> A bu5 A
-    indices = [m.start(0)+1 for m in re.finditer(r"(.)不\1", hanzis)]
-    for idx in indices:
-        pinyins[idx] = "bu5"
+    hanzis_prev = "^" + hanzis[:-1]
+    pinyins_prev = ["^"] + pinyins[:-1]
 
-    # 不 + A4 -> bu2 A4
-    pinyins = re.sub("bu4( [^ ]+?4)", r"bu2\1", " ".join(pinyins))
+    hanzis_next = hanzis[1:] + "$"
+    pinyins_next = pinyins[1:] + ["$"]
 
-    return pinyins.split()
+    _pinyins = []
+    for h, h_prev, h_next, p, p_prev, p_next in zip(hanzis, hanzis_prev, hanzis_next, pinyins, pinyins_prev, pinyins_next):
+        if h == "一" and p == "yi1":
+            if h_prev in "第初图表卷":
+                p = "YI1"
+            elif h_prev == "头" and h_next == "回":
+                p = "YI1"
+            elif h_prev == "末" and h_next == "次":
+                p = "YI1"
+            elif h_next in "号楼更等级一二三四五陆七八九十廿卅卌百皕千万亿":
+                p = "YI1"
+            elif h_prev == h_next: # 4. A一A -> A yi5 A
+                p = "yi5"
+            elif p_next[-1] == "4": # 一 + A4 -> yi2 A4
+                p = "yi2"
+            elif p_next[-1] in "123": # 一 + A{1,2,3} -> yi4 A{1,2,3}
+                p = "yi4"
+        if h == "不" and p=="bu4":
+            if p_next[-1] == "4": # 不 + A4 -> bu2 A4
+                p = "bu2"
+            elif h_prev == h_next: # A不A -> A bu5 A
+                p = "bu5"
+        p = p.replace("YI", "yi")
+        _pinyins.append(p)
 
-
-def tone_yi(hanzis, pinyins):
-    '''https://en.wikipedia.org/wiki/Standard_Chinese_phonology#Tone_sandhi
-    For 一 yī:
-
-    一 is pronounced with second tone when followed by a fourth tone syllable.
-
-        Example: 一定 (yī+dìng, "must") becomes yídìng [i˧˥tiŋ˥˩]
-
-    Before a first, second or third tone syllable, 一 is pronounced with fourth tone.
-
-        Examples：一天 (yī+tiān, "one day") becomes yìtiān [i˥˩tʰjɛn˥], 一年 (yī+nián, "one year") becomes yìnián [i˥˩njɛn˧˥], 一起 (yī+qǐ, "together") becomes yìqǐ [i˥˩t͡ɕʰi˨˩˦].
-
-    When final, or when it comes at the end of a multi-syllable word (regardless of the first tone of the next word), 一 is pronounced with first tone. It also has first tone when used as an ordinal number (or part of one), and when it is immediately followed by any digit (including another 一; hence both syllables of the word 一一 yīyī and its compounds have first tone).
-    When 一 is used between two reduplicated words, it may become neutral in tone (e.g. 看一看 kànyikàn ("to take a look of")).
-    '''
-    # A一A -> A yi5 A
-    indices = [m.start(0)+1 for m in re.finditer(r"(.)一\1", hanzis)]
-    for idx in indices:
-        pinyins[idx] = "yi5"
-
-    # 一 + A4 -> yi2 A4
-    pinyins = re.sub("yi1( [^ ]+?4)", r"yi2\1", " ".join(pinyins))
-
-    # 一 + A{1,2,3} -> yi4 A{1,2,3}
-    pinyins = re.sub("yi1( [^ ]+?[123])", r"yi4\1", pinyins)
-
-    return pinyins.split()
+    return _pinyins
 
 
 def tone_change(results):
-    hanzis = "".join(result[0] for result in results)
+    hanzis = [result[0] for result in results]
     pinyins = [result[2] for result in results]
 
-    pinyins = tone33_to_23(pinyins)
-    pinyins = tone_bu(hanzis, pinyins)
-    pinyins = tone_yi(hanzis, pinyins)
+    pinyins = _tone_change(hanzis, pinyins)
 
+    # align
     rule_applied = []
     for result in results:
         n_syls = len(result[2].split())
@@ -249,15 +239,10 @@ class G2pC(object):
 
 
 if __name__ == "__main__":
-    strings = ["行李不多, 去三几个人就搬回来了", "我写了几行代码。", "来不了", "老鼠", "保管好", "老保管", "不是", "是不是", "一定", "一天", "看一看", "一心一意" ]
+    strings = ["有一次", "第一次", "十一二岁来到戏校", "同年十一月", "一九八二年英文版", "欧洲统一步伐", "吉林省一号工程", "一是选拔优秀干部"]
     g2p = G2pC()
     for string in strings:
         results = g2p(string)
-        print(results)
-
-
-
-
-
-
+        change = [each[3] for each in results]
+        print(string, "/", "|".join(change))
 
