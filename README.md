@@ -93,8 +93,10 @@ word, pos, pronunciation candidates, meaning candidates, traditional character c
 'lai2-bu4-le5'
 ```
 ## Changelog
-### 0.9.9.1 July 9, 2019
+### 0.9.9.2 July 10, 2019
+* Refined the `cedict.pkl`. 
 
+### 0.9.9.1 July 9, 2019
 * Fixed a bug of failing to find Chinese characters for names. (See [this](https://github.com/Kyubyong/g2pC/issues/3))
 
 ### 0.9.6. July 7, 2019
